@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (ruff + mypy + bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction -E anthropic
+      - name: ruff check
+        run: poetry run ruff check pytest_llm_evals tests examples
+      - name: ruff format --check
+        run: poetry run ruff format --check pytest_llm_evals tests examples
+      - name: mypy
+        run: poetry run mypy pytest_llm_evals
+      - name: bandit
+        run: poetry run bandit -c pyproject.toml -q -r pytest_llm_evals
+
+  audit:
+    name: pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root -E anthropic
+      - name: pip-audit
+        run: |
+          # pip is tooling, not a shipped dependency: upgrade it so its own
+          # advisories don't fail the audit.
+          poetry run python -m pip install --upgrade -q pip
+          poetry run pip-audit
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction -E anthropic
+      - name: pytest under coverage (pytester + fake models, no network)
+        run: |
+          poetry run coverage run -m pytest -q
+          poetry run coverage report
+      - name: Example suite, then a free replay with a regression baseline
+        run: |
+          poetry run pytest examples -q --llm-eval-json=llm-eval-report.json \
+            --llm-eval-html=llm-eval-report.html --llm-eval-min-score=0.8 \
+            --llm-budget-tokens=50000 --junitxml=junit.xml
+          poetry run pytest examples -q --llm-cache=replay \
+            --llm-eval-baseline=llm-eval-report.json --llm-eval-min-score=0.8
+      - name: Upload eval reports
+        if: always() && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-eval-report
+          path: |
+            llm-eval-report.json
+            llm-eval-report.html
+            junit.xml
+
+  install:
+    name: Plain pip install (no extras)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install the package alone
+        run: |
+          python -m venv /tmp/venv
+          /tmp/venv/bin/pip install -q .
+      - name: The pytest11 entry point registers the plugin
+        run: |
+          cd /tmp
+          /tmp/venv/bin/pytest --help | grep -q -- "--llm-budget-usd"
+          /tmp/venv/bin/python -c "import pytest_llm_evals, sys; assert 'anthropic' not in sys.modules"

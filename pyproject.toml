@@ -1,0 +1,135 @@
+[tool.poetry]
+name = "pytest-llm-evals"
+version = "0.1.0"
+description = "A pytest plugin for evaluating LLM apps and agents like unit tests: golden datasets, scorers, LLM-as-judge with bias and prompt-injection mitigations, cost/token/latency budgets, response caching, pass@k and regression baselines. Runs 100% locally on ollama."
+authors = ["Martín Castro Álvarez <martincastro.10.5@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/MartinCastroAlvarez/pytest-llm-evals"
+repository = "https://github.com/MartinCastroAlvarez/pytest-llm-evals"
+documentation = "https://github.com/MartinCastroAlvarez/pytest-llm-evals#readme"
+keywords = [
+    "pytest",
+    "pytest-plugin",
+    "llm",
+    "evals",
+    "llm-evaluation",
+    "llm-as-judge",
+    "ai-agents",
+    "rag",
+    "ollama",
+    "llmops",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+packages = [{ include = "pytest_llm_evals" }]
+include = [
+    { path = "LICENSE", format = ["sdist", "wheel"] },
+]
+
+[tool.poetry.plugins."pytest11"]
+llm_evals = "pytest_llm_evals.plugin"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytest = ">=8.0"
+pyyaml = "^6.0"
+jsonschema = "^4.18"
+anthropic = { version = ">=0.69", optional = true }
+fastembed = { version = ">=0.5", optional = true }
+
+[tool.poetry.extras]
+# Optional hosted judge/app adapter. Never needed for local use or the tests.
+anthropic = ["anthropic"]
+# Local ONNX embeddings (CPU) for embedding_similarity.
+embeddings = ["fastembed"]
+
+[tool.poetry.group.dev.dependencies]
+coverage = { version = "^7.6", extras = ["toml"] }
+ruff = ">=0.6"
+mypy = "^1.11 || ^2.0"
+bandit = "^1.7"
+pip-audit = "^2.7"
+types-pyyaml = "^6.0"
+types-jsonschema = "^4.23"
+
+[build-system]
+requires = ["poetry-core>=1.6.0"]
+build-backend = "poetry.core.masonry.api"
+
+# --------------------------------------------------------------------------- #
+# Ruff
+# --------------------------------------------------------------------------- #
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "S", "UP", "SIM", "RET", "PIE"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S105", "S106", "S108", "E501"]
+"examples/**/*.py" = ["S101"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+known-first-party = ["pytest_llm_evals", "tests"]
+
+# --------------------------------------------------------------------------- #
+# Pytest
+# --------------------------------------------------------------------------- #
+[tool.pytest.ini_options]
+python_files = ["test_*.py"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "-p", "pytester"]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+# --------------------------------------------------------------------------- #
+# MyPy
+# --------------------------------------------------------------------------- #
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[[tool.mypy.overrides]]
+module = ["fastembed", "fastembed.*", "anthropic", "anthropic.*"]
+ignore_missing_imports = true
+
+# --------------------------------------------------------------------------- #
+# Coverage (run as `coverage run -m pytest`: the plugin is imported by pytest
+# before pytest-cov could start, so coverage must wrap the interpreter)
+# --------------------------------------------------------------------------- #
+[tool.coverage.run]
+branch = true
+source = ["pytest_llm_evals"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "\\.\\.\\.$",
+]
+
+# --------------------------------------------------------------------------- #
+# Bandit
+# --------------------------------------------------------------------------- #
+[tool.bandit]
+exclude_dirs = ["tests", "examples", ".venv", "build", "dist"]

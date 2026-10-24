@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" xml:space="preserve">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#34d399"/>
+    </marker>
+  </defs>
+  <style>
+    text  { white-space: pre; }
+    .title { font: 700 60px 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #f5f7ff; }
+    .pitch { font: 400 25px 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #aab3cc; }
+    .box   { fill: #131a33; stroke: #2a3558; stroke-width: 2; }
+    .acc   { fill: #0f2a22; stroke: #34d399; stroke-width: 2.5; }
+    .lbl   { font: 600 21px 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #f5f7ff; }
+    .sub   { font: 400 15px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #8f9bbb; }
+    .code  { font: 600 15px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #f5f7ff; }
+    .ok    { font: 700 15px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #34d399; }
+    .bad   { font: 700 15px 'SFMono-Regular', Menlo, Consolas, monospace; fill: #f87171; }
+    .line  { stroke: #34d399; stroke-width: 2.5; fill: none; }
+    .term  { fill: #070b17; stroke: #2a3558; stroke-width: 2; }
+  </style>
+
+  <rect width="1280" height="640" fill="#0b1020"/>
+
+  <text x="80" y="118" class="title">pytest-llm-evals</text>
+  <text x="80" y="164" class="pitch">Evaluate LLM apps and agents like unit tests. Runs 100% locally.</text>
+  <rect x="80" y="188" width="120" height="4" rx="2" fill="#34d399"/>
+
+  <!-- golden set -->
+  <rect x="80" y="250" width="250" height="300" rx="16" class="box"/>
+  <text x="104" y="288" class="lbl">golden set</text>
+  <text x="104" y="326" class="code">evals/qa.yaml</text>
+  <text x="104" y="360" class="sub">- id: mars-moons</text>
+  <text x="104" y="382" class="sub">  input: Moons of</text>
+  <text x="104" y="404" class="sub">         Mars?</text>
+  <text x="104" y="426" class="sub">  expected: Phobos</text>
+  <text x="104" y="448" class="sub">            and Deimos</text>
+  <text x="104" y="500" class="sub">@mark.llm_eval(</text>
+  <text x="104" y="522" class="sub">  dataset=...)</text>
+
+  <path d="M330 400 L 376 400" class="line" marker-end="url(#arrow)"/>
+
+  <!-- scoring -->
+  <rect x="380" y="250" width="400" height="300" rx="16" class="acc"/>
+  <text x="404" y="288" class="lbl">your app (local ollama) + scorers</text>
+  <text x="404" y="328" class="code">contains · regex · json schema</text>
+  <text x="404" y="354" class="code">ROUGE · BLEU · embeddings</text>
+  <text x="404" y="380" class="code">tool-call trajectory</text>
+  <text x="404" y="420" class="lbl">LLM-as-judge</text>
+  <text x="404" y="452" class="sub">rubric · pairwise · position swap</text>
+  <text x="404" y="474" class="sub">N samples, majority vote</text>
+  <text x="404" y="496" class="sub">delimited, injection-resistant</text>
+  <text x="404" y="530" class="sub">cache: re-runs free + deterministic</text>
+
+  <path d="M780 400 L 826 400" class="line" marker-end="url(#arrow)"/>
+
+  <!-- terminal summary -->
+  <rect x="830" y="250" width="370" height="300" rx="16" class="term"/>
+  <text x="854" y="288" class="lbl">gates fail the run</text>
+  <text x="854" y="328" class="ok">PASSED</text><text x="934" y="328" class="code">[mars-moons]  0.92</text>
+  <text x="854" y="354" class="ok">PASSED</text><text x="934" y="354" class="code">[venus-temp]  0.88</text>
+  <text x="854" y="380" class="bad">FAILED</text><text x="934" y="380" class="code">[saturn]      0.41</text>
+  <text x="854" y="424" class="sub">--llm-eval-min-score 0.8</text>
+  <text x="854" y="448" class="sub">--llm-budget-usd 0.50</text>
+  <text x="854" y="472" class="sub">--llm-budget-tokens 50000</text>
+  <text x="854" y="496" class="sub">--llm-eval-baseline main.json</text>
+  <text x="854" y="530" class="sub">pass@k · JSON · HTML · JUnit</text>
+
+  <text x="80" y="600" class="sub">pip install pytest-llm-evals  ·  pytest --llm-cache=replay  ·  local models cost $0</text>
+</svg>

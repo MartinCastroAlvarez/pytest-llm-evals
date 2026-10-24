@@ -1,0 +1,38 @@
+# --- Secrets / env ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.python-version
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# --- Local agent state ---
+.claude/
+
+# --- Virtualenv ---
+.venv/
+poetry.toml
+
+# --- eval artefacts (commit your own cache if you want replay in CI) ---
+.llm-eval-cache/
+llm-eval-report.*

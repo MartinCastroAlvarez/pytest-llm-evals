@@ -1,0 +1,29 @@
+# Golden set for examples/rag.py. `context` is the document the answer must cite.
+defaults:
+  min_score: 0.6
+cases:
+  - id: smallest-planet
+    input: Which planet is the smallest in the Solar System?
+    expected: Mercury is the smallest planet in the Solar System
+    context: mercury
+    tags: [facts]
+  - id: hottest-planet
+    input: What is the surface temperature of the hottest planet?
+    expected: about 465 degrees Celsius
+    context: venus
+    tags: [facts, numbers]
+  - id: mars-moons
+    input: What are the names of the moons of Mars?
+    expected: Phobos and Deimos
+    context: mars
+    tags: [facts]
+  - id: saturn-rings
+    input: What are Saturn's rings made of?
+    expected: ice particles with some rock and dust
+    context: saturn
+    tags: [facts]
+  - id: out-of-scope
+    input: Who won the 1998 football world cup?
+    expected: I don't know
+    context: null
+    tags: [refusal]
